@@ -7,13 +7,13 @@ import kotlin.random.Random
 
 class MainActivity : AppCompatActivity() {
     // the following 3 functions are just for generating questions
-    fun addition(){
+    private fun addition(){
         num1 = Random.nextInt(1, 100)
         num2 = Random.nextInt(1, 100)
         correctAnswer = num1 + num2
-        binding.tvQuestion.text = num1.toString() + " + " + num2.toString() + " = "
+        binding.tvQuestion.text = "$num1 + $num2 = "
     }
-    fun subtraction(){
+    private fun subtraction(){
         num1 = Random.nextInt(1, 100)
         num2 = Random.nextInt(1, 100)
         if (num1 < num2) {
@@ -22,13 +22,13 @@ class MainActivity : AppCompatActivity() {
             num2 = temp
         }
         correctAnswer = num1 - num2
-        binding.tvQuestion.text = num1.toString() + " - " + num2.toString() + " = "
+        binding.tvQuestion.text = "$num1 - $num2 = "
     }
-    fun multiplication(){
+    private fun multiplication(){
         num1 = Random.nextInt(1, 21)
         num2 = Random.nextInt(1, 21)
         correctAnswer = num1 * num2
-        binding.tvQuestion.text = num1.toString() + " * " + num2.toString() + " = "
+        binding.tvQuestion.text = "$num1 * $num2 = "
     }
 
     private lateinit var binding: ActivityMainBinding
@@ -44,13 +44,13 @@ class MainActivity : AppCompatActivity() {
     private var jackpot = 5
 
 
-    var waitForAnswer = false // false = last player finished problem and new player hasn't yet rolled for a problem,
+    private var waitForAnswer = false // false = last player finished problem and new player hasn't yet rolled for a problem,
                               // true = player has rolled for a problem but not answered yet
-    var waitForRoll = true    // similar to waitForAnswer except with respect to the enter answer button
-    var reRoll = false
+                              private var waitForRoll = true    // similar to waitForAnswer except with respect to the enter answer button
+    private var reRoll = false
 
-    var player2Turn = false // false = player 1 turn, true = player 2 turn
-    var gameWon = false
+    private var player2Turn = false // false = player 1 turn, true = player 2 turn
+    private var gameWon = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,8 +60,8 @@ class MainActivity : AppCompatActivity() {
 
         //event handler for rolling the die
         binding.btnRoll.setOnClickListener {
-            var image = "@drawable/dice" + originalDieValue
-            var resourceID = resources.getIdentifier(image, "drawable", getPackageName())
+            var image = "@drawable/dice$originalDieValue"
+            var resourceID = resources.getIdentifier(image, "drawable", packageName)
 
             //Blocks user from continuously re rolling the die
             if (waitForAnswer) {
@@ -71,8 +71,8 @@ class MainActivity : AppCompatActivity() {
             //guard clause for when we need to re roll the die if they get a 4 or 6 first
             if (reRoll) {
                 reRollDieValue = Random.nextInt(1, 4)
-                image = "@drawable/dice" + reRollDieValue
-                resourceID = resources.getIdentifier(image, "drawable", getPackageName())
+                image = "@drawable/dice$reRollDieValue"
+                resourceID = resources.getIdentifier(image, "drawable", packageName)
                 binding.ivDie.setImageResource(resourceID)
 
             when (reRollDieValue) {
@@ -91,8 +91,8 @@ class MainActivity : AppCompatActivity() {
 
             //main body for normal presses
             originalDieValue = Random.nextInt(1, 7)
-            image = "@drawable/dice" + originalDieValue
-            resourceID = resources.getIdentifier(image, "drawable", getPackageName())
+            image = "@drawable/dice$originalDieValue"
+            resourceID = resources.getIdentifier(image, "drawable", packageName)
             binding.ivDie.setImageResource(resourceID)
 
             when (originalDieValue) {
@@ -156,6 +156,7 @@ class MainActivity : AppCompatActivity() {
                 binding.tvQuestion.text = "Player 1 roll"
                 return@setOnClickListener
             }
+
             var userAns = binding.etAnswer.text.toString().toInt()
             var addToScore = 0
 
@@ -188,7 +189,7 @@ class MainActivity : AppCompatActivity() {
             } else {
 
                 jackpot += originalDieValue
-                binding.tvJackpot.text = "Jackpot = " + jackpot
+                binding.tvJackpot.text = "Jackpot = $jackpot"
             }
 
             if (binding.tvScore1.text.toString().toInt() >= 20){
