@@ -6,6 +6,7 @@ import com.example.cis_436_project_1.databinding.ActivityMainBinding
 import kotlin.random.Random
 
 class MainActivity : AppCompatActivity() {
+    // the following 3 functions are just for generating questions
     fun addition(){
         num1 = Random.nextInt(1, 100)
         num2 = Random.nextInt(1, 100)
@@ -29,20 +30,6 @@ class MainActivity : AppCompatActivity() {
         correctAnswer = num1 * num2
         binding.tvQuestion.text = num1.toString() + " * " + num2.toString() + " = "
     }
-    fun newGame(){
-        originalDieValue = 1
-        reRollDieValue = 1
-        num1 = 0
-        num2 = 0
-        correctAnswer = 0
-        jackpot = 5
-        player2Turn = false
-        waitForAnswer = false
-        waitForRoll = true
-        reRoll = false
-        gameWon = false
-        binding.tvPlayerTurn.text = "Player 1's turn"
-    }
 
     private lateinit var binding: ActivityMainBinding
 
@@ -56,11 +43,13 @@ class MainActivity : AppCompatActivity() {
 
     private var jackpot = 5
 
-    var player2Turn = false // false = player 1 turn, true = player 2 turn
+
     var waitForAnswer = false // false = last player finished problem and new player hasn't yet rolled for a problem,
                               // true = player has rolled for a problem but not answered yet
-    var waitForRoll = true
+    var waitForRoll = true    // similar to waitForAnswer except with respect to the enter answer button
     var reRoll = false
+
+    var player2Turn = false // false = player 1 turn, true = player 2 turn
     var gameWon = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -70,8 +59,6 @@ class MainActivity : AppCompatActivity() {
 
 
         //event handler for rolling the die
-        //when we roll the die we change the die image, figure out what problem to do
-        //and display it
         binding.btnRoll.setOnClickListener {
             var image = "@drawable/dice" + originalDieValue
             var resourceID = resources.getIdentifier(image, "drawable", getPackageName())
@@ -81,7 +68,7 @@ class MainActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            //guard clause for when we need to reroll the die if they get a 4 or 6 first
+            //guard clause for when we need to re roll the die if they get a 4 or 6 first
             if (reRoll) {
                 reRollDieValue = Random.nextInt(1, 4)
                 image = "@drawable/dice" + reRollDieValue
@@ -117,13 +104,20 @@ class MainActivity : AppCompatActivity() {
                 3 -> multiplication()
                 //re roll for double points
                 4-> { reRoll=true
-                    binding.tvPlayerTurn.text = "Press the roll button \nagain to try for a \nquestion worth double points!"
+                    binding.tvPlayerTurn.text = "Press the roll button \nagain to try for a \nquestion worth \ndouble points!"
                     return@setOnClickListener
                 }
                 //current player loses turn
                 5-> {
-                    binding.tvPlayerTurn.text = "Sorry, you lost your turn. Next players turn"
+                    if (player2Turn){
+                        binding.tvPlayerTurn.text = "Player 2 lost a turn"
+                        player2Turn = !player2Turn
+                        binding.tvQuestion.text = "Player 1 roll"
+                        return@setOnClickListener
+                    }
+                    binding.tvPlayerTurn.text = "Player 1 lost a turn"
                     player2Turn = !player2Turn
+                    binding.tvQuestion.text = "Player 2 roll"
                     return@setOnClickListener
                 }
                 //player tries for the jackpot
@@ -138,18 +132,38 @@ class MainActivity : AppCompatActivity() {
 
         //event handler for entering the answer
         binding.btnEnter.setOnClickListener {
+            //prevents button from being pressed if we need the player to roll the die
             if (waitForRoll) {
                 return@setOnClickListener
             }
+
             if (gameWon){
-                newGame()
+                originalDieValue = 1
+                reRollDieValue = 1
+                num1 = 0
+                num2 = 0
+                correctAnswer = 0
+                jackpot = 5
+                player2Turn = false
+                waitForAnswer = false
+                waitForRoll = true
+                reRoll = false
+                gameWon = false
+                binding.tvPlayerTurn.text = "Player 1's turn"
+                binding.tvScore1.text = "0"
+                binding.tvScore2.text = "0"
+                binding.etAnswer.text.clear()
+                binding.tvQuestion.text = "Player 1 roll"
                 return@setOnClickListener
             }
             var userAns = binding.etAnswer.text.toString().toInt()
             var addToScore = 0
+
             waitForAnswer = false
             waitForRoll = true
 
+            //adds score based on the value rolled for the die, so failed double points questions will
+            //count for 4 points, and failed jackpots count for 6
             when (originalDieValue) {
                 in 1..3 -> addToScore = originalDieValue
                 4-> addToScore = 2 * reRollDieValue
@@ -180,11 +194,15 @@ class MainActivity : AppCompatActivity() {
             if (binding.tvScore1.text.toString().toInt() >= 20){
                 binding.tvPlayerTurn.text = "Player 1 won the game!\n Press the answer button for a new game!"
                 gameWon = true
+                waitForAnswer = true
+                waitForRoll = false
                 return@setOnClickListener
             }
             if (binding.tvScore2.text.toString().toInt() >= 20){
                 binding.tvPlayerTurn.text = "Player 2 won the game!\n Press the answer button for a new game!"
                 gameWon = true
+                waitForAnswer = true
+                waitForRoll = false
                 return@setOnClickListener
             }
 
